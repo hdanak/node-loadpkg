@@ -1,0 +1,17 @@
+{ "name": "loadpkg"
+, "version": "0.0.1"
+, "author": "Hike Danakian"
+, "description": "Pythonic directory-package imports for NodeJs"
+, "main": "index.js"
+, "repository":
+  { "type": "git"
+  , "url": "git://github.com/hdanak/node-loadpkg.git"
+  }
+, "license": "MPL-2.0"
+, "dependencies":
+  { "js-yaml": "latest"
+  }
+, "devDependencies":
+  { "qunit": "latest"
+  }
+}

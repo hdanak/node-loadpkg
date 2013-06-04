@@ -1,0 +1,2 @@
+
+var loadpkg = require('..');
