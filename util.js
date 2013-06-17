@@ -47,4 +47,7 @@ self = module.exports = {
             return self.defined(val) ? val : val = fx.apply(self, arguments);
         }
     },
+    escapeRegExp: function (string) {
+        return string.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
+    },
 };

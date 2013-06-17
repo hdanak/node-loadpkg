@@ -1,0 +1,5 @@
+* recursive package loading
+* read package.json for main
+* 'init' config option
+* handle circular package loading
+* allow async package loading

@@ -1,36 +1,44 @@
 var util = require('./util');
-module.exports = function loadpkg(path, opts) {
+module.exports = function loadpkg(base, opts) {
     var yaml = require('js-yaml'),
+        path = require('path'),
         fs   = require('fs'),
         pkg  = {};
 
-    path = util.ifndef(path, '.');
+    base = util.ifndef(base, '.');
     opts = util.ifndef(opts, {});
     util.setdefaults(opts, {
         camelcase:  true,
-        recursive:  false,
+        init:       false,
         lazy:       true,
         watch:      false,
-        exts:       {},
+        loaders:    {},
         ignore:     [],
-        test:       function() { return true },
+        filter:     function() { return true },
         error:      function() {},
     });
-    ['js', 'json', 'yaml', 'yml', ''].forEach(function (ext) {
-        if (!(ext in opts.exts)) opts.exts[ext] = require;
-    });
 
-    fs.readdirSync(path).filter(function (f) {
+    function initCheck(f) {
+        if (!opts.init) return false;
+        if (typeof opts.init === 'string' || opts.init instanceof RegExp)
+            return !!f.match(opts.init);
+        if (opts.init) try {
+            return !!f.match(util.escapeRegExp(
+                        require(path.join(base, 'package.json')).main));
+        } catch (e) {}
+        return !!f.match(/^index\./);
+    }
+
+    fs.readdirSync(base).filter(function (f) {
         return f.match(/^\w/)
-            && path+'/'+f !== module.parent.filename
-            && f !== 'index.js'
+            && path.join(base, f) !== module.parent.filename
+            && !initCheck(f)
             && opts.ignore.indexOf(f) == -1
-    }).filter(opts.test).map(function (f) {
-        var info = { ext: '', filename: f, abs: path+'/'+f };
+    }).filter(opts.filter).map(function (f) {
+        var info = { ext: '', filename: f, abs: path.join(base, f) };
         if (fs.statSync(info.abs).isFile()) {
             info.ext = (f.match(/\.([^.]+)$/) || ['',''])[1];
-            if (info.ext in opts.exts)
-                info.loader = opts.exts[info.ext];
+            info.loader = info.ext in opts.loaders ? opts.loaders[info.ext] : require;
         }
         info.key = info.ext ? f.replace(/\.[^.]*$/, '') : f;
         if (opts.camelcase)
